@@ -10,6 +10,12 @@ let empresa = JSON.parse(localStorage.getItem('empresa')) || {
 };
 let itensDocumento = [];
 
+function salvarDados() {
+  localStorage.setItem('estoque', JSON.stringify(estoque));
+  localStorage.setItem('historico', JSON.stringify(historico));
+  localStorage.setItem('financeiro', JSON.stringify(financeiro));
+}
+
 // ==================== ELEMENTOS DA TELA ====================
 const formEstoque = document.getElementById('form-movimentacao');
 const tabelaEstoque = document.getElementById('tabela-estoque');
@@ -28,7 +34,7 @@ function dataHojeISO() {
 
 document.getElementById('data-fin').value = dataHojeISO();
 
-// Inicializa dados da empresa e telas
+// Inicializa telas
 carregarDadosEmpresa();
 atualizarTelaEstoque();
 atualizarTelaFinanceiro();
@@ -45,12 +51,8 @@ function trocarAba(aba, botaoClicado) {
   document.getElementById('secao-' + aba).classList.remove('oculto');
   botaoClicado.classList.add('ativa');
 
-  if (aba === 'financeiro') {
-    atualizarTelaFinanceiro();
-  }
-  if (aba === 'documentos') {
-    atualizarPreviewDocumento();
-  }
+  if (aba === 'financeiro') atualizarTelaFinanceiro();
+  if (aba === 'documentos') atualizarPreviewDocumento();
 }
 
 // ==================== LÓGICA DE ESTOQUE, CUSTO E MARGEM ====================
@@ -90,12 +92,8 @@ formEstoque.addEventListener('submit', function(event) {
     estoque[chave] = { nome: nomeInput, quantidade: 0, custo: 0, venda: 0 };
   }
 
-  if (!isNaN(inputCusto) && inputCusto >= 0) {
-    estoque[chave].custo = inputCusto;
-  }
-  if (!isNaN(inputVenda) && inputVenda >= 0) {
-    estoque[chave].venda = inputVenda;
-  }
+  if (!isNaN(inputCusto) && inputCusto >= 0) estoque[chave].custo = inputCusto;
+  if (!isNaN(inputVenda) && inputVenda >= 0) estoque[chave].venda = inputVenda;
 
   const custoAtual = estoque[chave].custo || 0;
   const vendaAtual = estoque[chave].venda || 0;
@@ -171,9 +169,7 @@ function atualizarTelaEstoque() {
     custoTotalEstoque += custo * item.quantidade;
     vendaTotalEstoque += venda * item.quantidade;
 
-    if (termoBusca && !item.nome.toLowerCase().includes(termoBusca)) {
-      continue;
-    }
+    if (termoBusca && !item.nome.toLowerCase().includes(termoBusca)) continue;
 
     let margemHTML = '<span style="color:#94a3b8;">—</span>';
     if (venda > 0 && custo > 0) {
@@ -215,7 +211,7 @@ function atualizarTelaEstoque() {
   elLucro.style.color = lucroProjetado >= 0 ? '#16a34a' : '#dc2626';
 
   listaHistorico.innerHTML = '';
-  historico.forEach(mov => {
+  historico.slice(0, 30).forEach(mov => {
     const li = document.createElement('li');
     const sinal = mov.tipo === 'entrada' ? '+' : '-';
     const classe = mov.tipo === 'entrada' ? 'entrada' : 'saida';
@@ -286,256 +282,4 @@ function formatarMoeda(valor) {
 
 function formatarDataBR(item) {
   if (item.dataISO) {
-    const [ano, mes, dia] = item.dataISO.split('-');
-    return `${dia}/${mes}/${ano}`;
-  }
-  return item.data || '';
-}
-
-function analisarVencimento(item) {
-  const statusAtual = item.status || 'pago';
-  if (statusAtual === 'pago') {
-    return { codigo: 'pago', html: `<span class="badge-ok">Pago</span>` };
-  }
-
-  const hojeStr = dataHojeISO();
-  const vencStr = item.dataISO || hojeStr;
-
-  const hojeDate = new Date(hojeStr + 'T00:00:00');
-  const vencDate = new Date(vencStr + 'T00:00:00');
-  const diffDias = Math.round((vencDate - hojeDate) / (1000 * 60 * 60 * 24));
-
-  if (diffDias < 0) {
-    const diasAtraso = Math.abs(diffDias);
-    return {
-      codigo: 'atrasado',
-      html: `<span class="badge-atrasado">Atrasado (${diasAtraso}d)</span>`
-    };
-  }
-  if (diffDias === 0) {
-    return {
-      codigo: 'vence_hoje',
-      html: `<span class="badge-alerta">Vence Hoje!</span>`
-    };
-  }
-  if (diffDias <= 3) {
-    return {
-      codigo: 'vence_breve',
-      html: `<span class="badge-alerta">Vence em ${diffDias}d</span>`
-    };
-  }
-  return {
-    codigo: 'pendente',
-    html: `<span class="badge-pendente">Pendente</span>`
-  };
-}
-
-function atualizarBannerAlertas() {
-  const banner = document.getElementById('banner-alertas');
-  let qtdAtrasadas = 0;
-  let valorAtrasado = 0;
-  let qtdVencendo = 0;
-
-  financeiro.forEach(item => {
-    const analise = analisarVencimento(item);
-    if (analise.codigo === 'atrasado') {
-      qtdAtrasadas++;
-      valorAtrasado += item.valor;
-    } else if (analise.codigo === 'vence_hoje' || analise.codigo === 'vence_breve') {
-      qtdVencendo++;
-    }
-  });
-
-  if (qtdAtrasadas === 0 && qtdVencendo === 0) {
-    banner.classList.add('oculto');
-    return;
-  }
-
-  const mensagens = [];
-  if (qtdAtrasadas > 0) {
-    mensagens.push(`<strong>Atenção:</strong> Você tem <strong>${qtdAtrasadas}</strong> conta(s) atrasada(s) somando <strong>${formatarMoeda(valorAtrasado)}</strong>.`);
-  }
-  if (qtdVencendo > 0) {
-    mensagens.push(`Existem <strong>${qtdVencendo}</strong> conta(s) pendente(s) vencendo hoje ou nos próximos 3 dias.`);
-  }
-
-  banner.innerHTML = mensagens.join(' ');
-  banner.classList.remove('oculto');
-}
-
-function atualizarTelaFinanceiro() {
-  atualizarBannerAlertas();
-
-  const mesFiltro = document.getElementById('filtro-mes').value;
-  const statusFiltro = document.getElementById('filtro-status').value;
-
-  let totalReceitasPagas = 0;
-  let totalDespesasPagas = 0;
-  let totalAReceber = 0;
-  let totalAPagar = 0;
-  const despesasPorCategoria = {};
-
-  tabelaFinanceiro.innerHTML = '';
-
-  financeiro.forEach(item => {
-    if (mesFiltro && item.dataISO && !item.dataISO.startsWith(mesFiltro)) {
-      return;
-    }
-
-    const statusItem = item.status || 'pago';
-    const analise = analisarVencimento(item);
-
-    if (statusItem === 'pago') {
-      if (item.tipo === 'receita') {
-        totalReceitasPagas += item.valor;
-      } else {
-        totalDespesasPagas += item.valor;
-        const cat = item.categoria || 'Outros';
-        despesasPorCategoria[cat] = (despesasPorCategoria[cat] || 0) + item.valor;
-      }
-    } else {
-      if (item.tipo === 'receita') {
-        totalAReceber += item.valor;
-      } else {
-        totalAPagar += item.valor;
-      }
-    }
-
-    if (statusFiltro === 'pago' && statusItem !== 'pago') return;
-    if (statusFiltro === 'pendente' && statusItem !== 'pendente') return;
-    if (statusFiltro === 'atrasado' && analise.codigo !== 'atrasado') return;
-
-    const classeValor = item.tipo === 'receita' ? 'entrada' : 'saida';
-    const sinal = item.tipo === 'receita' ? '+' : '-';
-    const classeLinha = analise.codigo === 'atrasado' ? 'linha-atrasada' : '';
-
-    const botaoBaixa = statusItem === 'pendente'
-      ? `<button class="btn-baixar" title="Marcar como Pago" onclick="darBaixaLancamento(${item.id})">Dar Baixa</button>`
-      : '';
-
-    const tr = document.createElement('tr');
-    tr.className = classeLinha;
-    tr.innerHTML = `
-      <td>${formatarDataBR(item)}</td>
-      <td>
-        <div>${item.descricao}</div>
-        <span class="badge-cat">${item.categoria || 'Geral'}</span>
-      </td>
-      <td>${analise.html}</td>
-      <td class="${classeValor}">${sinal} ${formatarMoeda(item.valor)}</td>
-      <td>
-        <div class="grupo-acoes-tabela">
-          ${botaoBaixa}
-          <button class="btn-excluir" onclick="removerLancamento(${item.id})">Excluir</button>
-        </div>
-      </td>
-    `;
-    tabelaFinanceiro.appendChild(tr);
-  });
-
-  const saldoReal = totalReceitasPagas - totalDespesasPagas;
-  document.getElementById('total-receitas').textContent = formatarMoeda(totalReceitasPagas);
-  document.getElementById('total-despesas').textContent = formatarMoeda(totalDespesasPagas);
-  document.getElementById('total-a-receber').textContent = formatarMoeda(totalAReceber);
-  document.getElementById('total-a-pagar').textContent = formatarMoeda(totalAPagar);
-
-  const elSaldo = document.getElementById('saldo-financeiro');
-  elSaldo.textContent = formatarMoeda(saldoReal);
-  elSaldo.style.color = saldoReal >= 0 ? '#16a34a' : '#dc2626';
-
-  desenharGraficoBarras(totalReceitasPagas, totalDespesasPagas);
-  desenharGraficoRosca(despesasPorCategoria, totalDespesasPagas);
-}
-
-// ==================== GRÁFICOS VISUAIS (CANVAS NATIVO) ====================
-function desenharGraficoBarras(receitas, despesas) {
-  const canvas = document.getElementById('grafico-barras');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  const maxValor = Math.max(receitas, despesas, 1);
-  const alturaMaxima = 125;
-  const baseY = 165;
-
-  ctx.strokeStyle = '#cbd5e1';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(30, baseY);
-  ctx.lineTo(270, baseY);
-  ctx.stroke();
-
-  const altRec = (receitas / maxValor) * alturaMaxima;
-  ctx.fillStyle = '#16a34a';
-  ctx.fillRect(65, baseY - altRec, 60, altRec);
-
-  const altDesp = (despesas / maxValor) * alturaMaxima;
-  ctx.fillStyle = '#dc2626';
-  ctx.fillRect(175, baseY - altDesp, 60, altDesp);
-
-  ctx.fillStyle = '#334155';
-  ctx.font = 'bold 12px Arial';
-  ctx.textAlign = 'center';
-  ctx.fillText('Receitas', 95, baseY + 18);
-  ctx.fillText('Despesas', 205, baseY + 18);
-
-  ctx.font = 'bold 11px Arial';
-  ctx.fillStyle = '#15803d';
-  ctx.fillText(formatarMoeda(receitas), 95, baseY - altRec - 6);
-
-  ctx.fillStyle = '#b91c1c';
-  ctx.fillText(formatarMoeda(despesas), 205, baseY - altDesp - 6);
-}
-
-function desenharGraficoRosca(categoriasObj, totalDespesas) {
-  const canvas = document.getElementById('grafico-rosca');
-  const legendaDiv = document.getElementById('legenda-rosca');
-  if (!canvas || !legendaDiv) return;
-
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  legendaDiv.innerHTML = '';
-
-  const centroX = canvas.width / 2;
-  const centroY = canvas.height / 2;
-  const raio = 65;
-
-  if (totalDespesas <= 0) {
-    ctx.beginPath();
-    ctx.arc(centroX, centroY, raio, 0, Math.PI * 2);
-    ctx.strokeStyle = '#e2e8f0';
-    ctx.lineWidth = 22;
-    ctx.stroke();
-
-    ctx.fillStyle = '#64748b';
-    ctx.font = '12px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('Sem despesas', centroX, centroY + 4);
-    return;
-  }
-
-  const cores = ['#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6', '#10b981', '#ec4899'];
-  const entradas = Object.entries(categoriasObj).sort((a, b) => b[1] - a[1]);
-
-  let anguloAtual = -Math.PI / 2;
-
-  entradas.forEach(([categoria, valor], index) => {
-    const fatia = (valor / totalDespesas) * Math.PI * 2;
-    const cor = cores[index % cores.length];
-
-    ctx.beginPath();
-    ctx.arc(centroX, centroY, raio, anguloAtual, anguloAtual + fatia);
-    ctx.strokeStyle = cor;
-    ctx.lineWidth = 24;
-    ctx.stroke();
-
-    anguloAtual += fatia;
-
-    const percentual = ((valor / totalDespesas) * 100).toFixed(0);
-    const itemLegenda = document.createElement('div');
-    itemLegenda.className = 'item-legenda';
-    itemLegenda.innerHTML = `
-      <span class="cor-legenda" style="background-color: ${cor};"></span>
-      <span><strong>${categoria}:</strong> ${percentual}% (${formatarMoeda(valor)})</span>
-    `;
-    legendaDiv.appendChild(itemLegenda);
+    const [ano, mes, dia] = item
