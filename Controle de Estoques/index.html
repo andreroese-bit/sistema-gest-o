@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão da Empresa - Estoque, Financeiro e Recibos</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f4f6f9;
+      color: #333;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .topo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      color: #1e293b;
+    }
+
+    h2 {
+      font-size: 1.05rem;
+      color: #334155;
+    }
+
+    .acoes-backup {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-secundario {
+      background-color: #e2e8f0;
+      color: #1e293b;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-secundario:hover {
+      background-color: #cbd5e1;
+    }
+
+    .btn-exportar {
+      background-color: #16a34a;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 7px 12px;
+      font-size: 0.82rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-exportar:hover {
+      background-color: #15803d;
+    }
+
+    /* Estilo das Abas */
+    .abas {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .aba-btn {
+      flex: 1;
+      padding: 12px;
+      background-color: #cbd5e1;
+      color: #1e293b;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .aba-btn:hover {
+      background-color: #94a3b8;
+      color: #fff;
+    }
+
+    .aba-btn.ativa {
+      background-color: #2563eb;
+      color: #fff;
+    }
+
+    .oculto {
+      display: none !important;
+    }
+
+    /* Banner de Alerta */
+    .banner-alerta {
+      background-color: #fef2f2;
+      border: 1px solid #fca5a5;
+      border-left: 5px solid #dc2626;
+      color: #991b1b;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    /* Cards e Formulários */
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+
+    .cabecalho-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .barra-busca {
+      width: 100%;
+      margin-bottom: 12px;
+      background-color: #f8fafc;
+    }
+
+    .filtro-mes-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 12px 20px;
+    }
+
+    .grupo-filtro {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filtro-mes-box input,
+    .filtro-mes-box select {
+      padding: 6px 10px;
+      font-size: 0.88rem;
+    }
+
+    .campo {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 12px;
+      flex: 1;
+      min-width: 125px;
+    }
+
+    .linha {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    label {
+      font-size: 0.86rem;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .linha-integracao {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .checkbox-linha {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: normal;
+      font-size: 0.9rem;
+      margin-bottom: 0;
+      cursor: pointer;
+    }
+
+    .select-compacto {
+      padding: 6px 10px;
+      font-size: 0.85rem;
+    }
+
+    input, select {
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 12px;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #1d4ed8;
+    }
+
+    /* Resumos */
+    .resumo-financeiro {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .card-resumo {
+      flex: 1;
+      min-width: 180px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .card-resumo span {
+      font-size: 0.83rem;
+      color: #64748b;
+    }
+
+    .card-resumo strong {
+      font-size: 1.15rem;
+    }
+
+    .receita-box strong { color: #16a34a; }
+    .despesa-box strong { color: #dc2626; }
+    .saldo-box strong { color: #1e293b; }
+
+    .resumo-pendentes {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .card-pendente {
+      flex: 1;
+      min-width: 220px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+
+    .receber-pendente {
+      background-color: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+    }
+
+    .pagar-pendente {
+      background-color: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+    }
+
+    /* Grade de Gráficos */
+    .grade-graficos {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .card-grafico {
+      flex: 1;
+      min-width: 300px;
+      margin-bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .card-grafico h2 {
+      width: 100%;
+      margin-bottom: 14px;
+      text-align: left;
+    }
+
+    .area-rosca {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .legenda-rosca {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.82rem;
+    }
+
+    .item-legenda {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cor-legenda {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    /* Tabelas e Badges */
+    .tabela-responsiva {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.88rem;
+    }
+
+    .linha-atrasada {
+      background-color: #fef2f2;
+    }
+
+    .detalhe-preco {
+      font-size: 0.8rem;
+      color: #64748b;
+      line-height: 1.35;
+    }
+
+    .margem-positiva {
+      color: #15803d;
+      font-weight: bold;
+    }
+
+    .margem-negativa {
+      color: #dc2626;
+      font-weight: bold;
+    }
+
+    .badge-ok {
+      background-color: #dcfce7;
+      color: #166534;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.76rem;
+      font-weight: bold;
+      display: inline-block;
+    }
+
+    .badge-baixo,
+    .badge-atrasado {
+      background-color: #fee2e2;
+      color: #991b1b;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.76rem;
+      font-weight: bold;
+      display: inline-block;
+    }
+
+    .badge-alerta {
+      background-color: #fef3c7;
+      color: #92400e;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.76rem;
+      font-weight: bold;
+      display: inline-block;
+    }
+
+    .badge-pendente {
+      background-color: #e0f2fe;
+      color: #075985;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.76rem;
+      font-weight: bold;
+      display: inline-block;
+    }
+
+    .badge-cat {
+      background-color: #f1f5f9;
+      color: #475569;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      display: inline-block;
+      margin-top: 3px;
+    }
+
+    .grupo-acoes-tabela {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .btn-baixar {
+      background-color: #16a34a;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 8px;
+      font-size: 0.78rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-baixar:hover {
+      background-color: #15803d;
+    }
+
+    .btn-excluir {
+      background-color: #ef4444;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 8px;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+
+    .btn-excluir:hover {
+      background-color: #dc2626;
+    }
+
+    ul {
+      list-style: none;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    li {
+      padding: 8px 0;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.88rem;
+    }
+
+    .entrada { color: #16a34a; font-weight: bold; }
+    .saida { color: #dc2626; font-weight: bold; }
+
+    /* ==================== RECIBO E ORÇAMENTO (PDF) ==================== */
+    .box-adicionar-item {
+      background-color: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 6px;
+    }
+
+    .btn-add-item {
+      background-color: #0f172a;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-add-item:hover {
+      background-color: #334155;
+    }
+
+    .acoes-documento {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .btn-imprimir {
+      flex: 1;
+      background-color: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-imprimir:hover {
+      background-color: #1d4ed8;
+    }
+
+    .folha-documento {
+      background: #fff;
+      padding: 32px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border: 1px solid #e2e8f0;
+    }
+
+    .doc-cabecalho {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid #1e293b;
+      padding-bottom: 16px;
+      margin-bottom: 18px;
+      gap: 16px;
+    }
+
+    .doc-cabecalho h2 {
+      font-size: 1.3rem;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+
+    .doc-subtexto {
+      font-size: 0.85rem;
+      color: #475569;
+      line-height: 1.4;
+    }
+
+    .doc-titulo-box {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .doc-badge-titulo {
+      background-color: #1e293b;
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      font-weight: bold;
+    }
+
+    .doc-cliente-box {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 0.9rem;
+    }
+
+    .doc-tabela th {
+      background-color: #f1f5f9;
+      color: #1e293b;
+    }
+
+    .doc-totais {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      font-size: 0.95rem;
+    }
+
+    .doc-total-final {
+      font-size: 1.15rem;
+      background-color: #f1f5f9;
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+    }
+
+    .doc-declaracao {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+
+    .doc-obs {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: #64748b;
+      font-style: italic;
+    }
+
+    .doc-assinatura {
+      margin-top: 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 0.85rem;
+      color: #475569;
+    }
+
+    .linha-assinatura {
+      width: 260px;
+      border-top: 1px solid #334155;
+      margin-bottom: 6px;
+    }
+
+    /* ==================== ESTILOS EXCLUSIVOS PARA IMPRESSÃO / PDF ==================== */
+    @media print {
+      body {
+        background: #fff !important;
+        padding: 0 !important;
+      }
+
+      .nao-imprimir {
+        display: none !important;
+      }
+
+      .container {
+        max-width: 100% !important;
+      }
+
+      .folha-documento {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topo-header nao-imprimir">
+      <h1 id="titulo-sistema">Gestão da Empresa</h1>
+      <div class="acoes-backup">
+        <button type="button" class="btn-secundario" onclick="exportarBackup()">Salvar Backup</button>
+        <button type="button" class="btn-secundario" onclick="document.getElementById('input-restaurar').click()">Restaurar</button>
+        <input type="file" id="input-restaurar" accept=".json" class="oculto" onchange="restaurarBackup(event)">
+      </div>
+    </div>
+
+    <!-- Menu de Abas -->
+    <div class="abas nao-imprimir">
+      <button type="button" id="btn-aba-estoque" class="aba-btn ativa" onclick="trocarAba('estoque')">Controle de Estoque</button>
+      <button type="button" id="btn-aba-financeiro" class="aba-btn" onclick="trocarAba('financeiro')">Receitas e Despesas</button>
+      <button type="button" id="btn-aba-documentos" class="aba-btn" onclick="trocarAba('documentos')">Recibo / Orçamento</button>
+    </div>
+
+    <!-- ==================== ABA 1: ESTOQUE ==================== -->
+    <div id="secao-estoque" class="secao">
+      <div class="resumo-financeiro">
+        <div class="card-resumo">
+          <span>Custo em Estoque</span>
+          <strong id="estoque-custo-total" style="color: #334155;">R$ 0,00</strong>
+        </div>
+        <div class="card-resumo">
+          <span>Potencial de Venda</span>
+          <strong id="estoque-venda-total" style="color: #2563eb;">R$ 0,00</strong>
+        </div>
+        <div class="card-resumo receita-box">
+          <span>Lucro Projetado</span>
+          <strong id="estoque-lucro-total">R$ 0,00</strong>
+        </div>
+      </div>
+
+      <form id="form-movimentacao" class="card">
+        <div class="linha">
+          <div class="campo" style="flex: 2;">
+            <label for="produto">Nome do Produto</label>
+            <input type="text" id="produto" list="lista-produtos-sugestao" placeholder="Ex: Teclado USB" oninput="preencherPrecosExistentes()" required>
+            <datalist id="lista-produtos-sugestao"></datalist>
+          </div>
+
+          <div class="campo">
+            <label for="tipo">Movimentação</label>
+            <select id="tipo">
+              <option value="entrada">Entrada / Compra (+)</option>
+              <option value="saida">Saída / Venda (-)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="linha">
+          <div class="campo">
+            <label for="quantidade">Quantidade</label>
+            <input type="number" id="quantidade" min="1" value="1" required>
+          </div>
+
+          <div class="campo">
+            <label for="preco-custo">Preço Custo (R$)</label>
+            <input type="number" id="preco-custo" step="0.01" min="0" placeholder="0,00">
+          </div>
+
+          <div class="campo">
+            <label for="preco-venda">Preço Venda (R$)</label>
+            <input type="number" id="preco-venda" step="0.01" min="0" placeholder="0,00">
+          </div>
+        </div>
+
+        <div class="linha-integracao">
+          <label class="checkbox-linha">
+            <input type="checkbox" id="integrar-financeiro" checked>
+            Lançar no Financeiro como:
+          </label>
+          <select id="status-estoque-fin" class="select-compacto">
+            <option value="pago">Pago / Recebido à vista</option>
+            <option value="pendente">Pendente (A Prazo)</option>
+          </select>
+        </div>
+
+        <button type="submit">Registrar Movimentação</button>
+      </form>
+
+      <div class="card">
+        <div class="cabecalho-card">
+          <h2>Saldo e Margem em Estoque</h2>
+          <button type="button" class="btn-exportar" onclick="exportarEstoqueCSV()">Exportar Excel (CSV)</button>
+        </div>
+
+        <input type="text" id="busca-estoque" class="barra-busca" placeholder="Buscar produto pelo nome..." oninput="atualizarTelaEstoque()">
+
+        <div class="tabela-responsiva">
+          <table>
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Qtd.</th>
+                <th>Custo / Venda</th>
+                <th>Margem</th>
+                <th>Status</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-estoque"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Histórico de Estoque</h2>
+        <ul id="lista-historico"></ul>
+      </div>
+    </div>
+
+    <!-- ==================== ABA 2: FINANCEIRO ==================== -->
+    <div id="secao-financeiro" class="secao oculto">
+      <div id="banner-alertas" class="banner-alerta oculto"></div>
+
+      <div class="card filtro-mes-box">
+        <div class="grupo-filtro">
+          <label for="filtro-mes">Mês (Venc.):</label>
+          <input type="month" id="filtro-mes" onchange="atualizarTelaFinanceiro()">
+        </div>
+
+        <div class="grupo-filtro">
+          <label for="filtro-status">Situação:</label>
+          <select id="filtro-status" onchange="atualizarTelaFinanceiro()">
+            <option value="todos">Todos os lançamentos</option>
+            <option value="pendente">Apenas Pendentes</option>
+            <option value="atrasado">Apenas Atrasados</option>
+            <option value="pago">Apenas Pagos</option>
+          </select>
+        </div>
+
+        <button type="button" class="btn-secundario" onclick="limparFiltrosFinanceiro()">Limpar Filtros</button>
+      </div>
+
+      <div class="resumo-financeiro">
+        <div class="card-resumo receita-box">
+          <span>Receitas Pagas</span>
+          <strong id="total-receitas">R$ 0,00</strong>
+        </div>
+        <div class="card-resumo despesa-box">
+          <span>Despesas Pagas</span>
+          <strong id="total-despesas">R$ 0,00</strong>
+        </div>
+        <div class="card-resumo saldo-box">
+          <span>Saldo em Caixa (Real)</span>
+          <strong id="saldo-financeiro">R$ 0,00</strong>
+        </div>
+      </div>
+
+      <div class="resumo-pendentes">
+        <div class="card-pendente receber-pendente">
+          <span>A Receber (Pendente)</span>
+          <strong id="total-a-receber">R$ 0,00</strong>
+        </div>
+        <div class="card-pendente pagar-pendente">
+          <span>A Pagar (Pendente)</span>
+          <strong id="total-a-pagar">R$ 0,00</strong>
+        </div>
+      </div>
+
+      <div class="grade-graficos">
+        <div class="card card-grafico">
+          <h2>Receitas x Despesas (Pagos)</h2>
+          <canvas id="grafico-barras" width="300" height="200"></canvas>
+        </div>
+        <div class="card card-grafico">
+          <h2>Despesas por Categoria</h2>
+          <div class="area-rosca">
+            <canvas id="grafico-rosca" width="160" height="160"></canvas>
+            <div id="legenda-rosca" class="legenda-rosca"></div>
+          </div>
+        </div>
+      </div>
+
+      <form id="form-financeiro" class="card">
+        <div class="linha">
+          <div class="campo" style="flex: 2;">
+            <label for="descricao-fin">Descrição</label>
+            <input type="text" id="descricao-fin" placeholder="Ex: Venda balcão / Boleto Fornecedor" required>
+          </div>
+
+          <div class="campo">
+            <label for="categoria-fin">Categoria</label>
+            <select id="categoria-fin">
+              <option value="Vendas">Vendas</option>
+              <option value="Fornecedores">Fornecedores</option>
+              <option value="Despesas Fixas">Despesas Fixas</option>
+              <option value="Impostos">Impostos</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="linha">
+          <div class="campo">
+            <label for="tipo-fin">Tipo</label>
+            <select id="tipo-fin">
+              <option value="receita">Receita (+)</option>
+              <option value="despesa">Despesa (-)</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="valor-fin">Valor (R$)</label>
+            <input type="number" id="valor-fin" step="0.01" min="0.01" placeholder="0,00" required>
+          </div>
+
+          <div class="campo">
+            <label for="data-fin">Vencimento / Data</label>
+            <input type="date" id="data-fin" required>
+          </div>
+
+          <div class="campo">
+            <label for="status-fin">Situação</label>
+            <select id="status-fin">
+              <option value="pago">Pago / Recebido</option>
+              <option value="pendente">Pendente</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit">Lançar no Caixa</button>
+      </form>
+
+      <div class="card">
+        <div class="cabecalho-card">
+          <h2>Lançamentos Financeiros</h2>
+          <button type="button" class="btn-exportar" onclick="exportarFinanceiroCSV()">Exportar Excel (CSV)</button>
+        </div>
+
+        <div class="tabela-responsiva">
+          <table>
+            <thead>
+              <tr>
+                <th>Vencimento</th>
+                <th>Descrição</th>
+                <th>Situação / Alerta</th>
+                <th>Valor</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-financeiro"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== ABA 3: RECIBO E ORÇAMENTO (PDF) ==================== -->
+    <div id="secao-documentos" class="secao oculto">
+      <div class="card nao-imprimir">
+        <div class="cabecalho-card">
+          <h2>Dados da Sua Empresa (Cabeçalho do PDF)</h2>
+          <button type="button" class="btn-secundario" onclick="salvarDadosEmpresa()">Salvar Dados da Loja</button>
+        </div>
+
+        <div class="linha">
+          <div class="campo" style="flex: 2;">
+            <label for="emp-nome">Nome da Empresa / Loja</label>
+            <input type="text" id="emp-nome" placeholder="Ex: Silva Comércio e Serviços" oninput="atualizarPreviewDocumento()">
+          </div>
+          <div class="campo">
+            <label for="emp-doc">CNPJ / CPF</label>
+            <input type="text" id="emp-doc" placeholder="00.000.000/0001-00" oninput="atualizarPreviewDocumento()">
+          </div>
+        </div>
+
+        <div class="linha">
+          <div class="campo">
+            <label for="emp-tel">Telefone / WhatsApp</label>
+            <input type="text" id="emp-tel" placeholder="(48) 99999-9999" oninput="atualizarPreviewDocumento()">
+          </div>
+          <div class="campo" style="flex: 2;">
+            <label for="emp-end">Endereço / Cidade</label>
+            <input type="text" id="emp-end" placeholder="Rua Central, 123 - Centro" oninput="atualizarPreviewDocumento()">
+          </div>
+        </div>
+      </div>
+
+      <div class="card nao-imprimir">
+        <h2>Montar Recibo ou Orçamento</h2>
+        <div class="linha" style="margin-top: 12px;">
+          <div class="campo">
+            <label for="doc-tipo">Tipo de Documento</label>
+            <select id="doc-tipo" onchange="atualizarPreviewDocumento()">
+              <option value="RECIBO DE PAGAMENTO">Recibo de Pagamento</option>
+              <option value="ORÇAMENTO COMERCIAL">Orçamento Comercial</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="doc-numero">Nº Documento</label>
+            <input type="text" id="doc-numero" value="0001" oninput="atualizarPreviewDocumento()">
+          </div>
+          <div class="campo">
+            <label for="doc-pagamento">Forma de Pagamento</label>
+            <select id="doc-pagamento" onchange="atualizarPreviewDocumento()">
+              <option value="Pix">Pix</option>
+              <option value="Dinheiro">Dinheiro</option>
+              <option value="Cartão de Crédito">Cartão de Crédito</option>
+              <option value="Cartão de Débito">Cartão de Débito</option>
+              <option value="Boleto / Transferência">Boleto / Transferência</option>
+              <option value="A Combinar">A Combinar</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="linha">
+          <div class="campo" style="flex: 2;">
+            <label for="doc-cliente">Nome do Cliente</label>
+            <input type="text" id="doc-cliente" placeholder="Ex: João da Silva" oninput="atualizarPreviewDocumento()">
+          </div>
+          <div class="campo">
+            <label for="doc-cliente-doc">CPF / CNPJ ou Telefone do Cliente</label>
+            <input type="text" id="doc-cliente-doc" placeholder="Opcional" oninput="atualizarPreviewDocumento()">
+          </div>
+        </div>
+
+        <div class="box-adicionar-item">
+          <label>Adicionar Produto ou Serviço:</label>
+          <div class="linha" style="margin-top: 6px;">
+            <div class="campo" style="flex: 2; margin-bottom: 0;">
+              <input type="text" id="doc-item-desc" list="lista-produtos-sugestao" placeholder="Digite ou escolha do estoque..." oninput="preencherPrecoItemDoc()">
+            </div>
+            <div class="campo" style="max-width: 90px; margin-bottom: 0;">
+              <input type="number" id="doc-item-qtd" min="1" value="1" placeholder="Qtd">
+            </div>
+            <div class="campo" style="max-width: 130px; margin-bottom: 0;">
+              <input type="number" id="doc-item-valor" step="0.01" min="0" placeholder="Valor Unit.">
+            </div>
+            <button type="button" class="btn-add-item" onclick="adicionarItemDocumento()">+ Incluir</button>
+          </div>
+        </div>
+
+        <div class="linha" style="margin-top: 12px;">
+          <div class="campo">
+            <label for="doc-desconto">Desconto (R$)</label>
+            <input type="number" id="doc-desconto" step="0.01" min="0" value="0" oninput="atualizarPreviewDocumento()">
+          </div>
+          <div class="campo" style="flex: 2;">
+            <label for="doc-obs">Observações / Validade do Orçamento</label>
+            <input type="text" id="doc-obs" placeholder="Ex: Orçamento válido por 7 dias. Garantia de 90 dias." oninput="atualizarPreviewDocumento()">
+          </div>
+        </div>
+
+        <div class="acoes-documento">
+          <button type="button" class="btn-imprimir" onclick="imprimirDocumentoPDF()">Imprimir / Salvar em PDF</button>
+          <button type="button" class="btn-secundario" onclick="limparDocumento()">Limpar Campos</button>
+        </div>
+      </div>
+
+      <!-- FOLHA DE VISUALIZAÇÃO DO RECIBO / ORÇAMENTO -->
+      <div id="folha-impressao" class="folha-documento">
+        <div class="doc-cabecalho">
+          <div>
+            <h2 id="prev-emp-nome">Sua Empresa Ltda</h2>
+            <p id="prev-emp-detalhes" class="doc-subtexto">Configure os dados da sua empresa acima</p>
+          </div>
+          <div class="doc-titulo-box">
+            <span id="prev-doc-tipo" class="doc-badge-titulo">RECIBO DE PAGAMENTO</span>
+            <strong id="prev-doc-num">Nº 0001</strong>
+            <small id="prev-doc-data"></small>
+          </div>
+        </div>
+
+        <div class="doc-cliente-box">
+          <div><strong>Cliente:</strong> <span id="prev-cliente">Consumidor Final</span></div>
+          <div id="prev-cliente-doc-linha" class="oculto"><strong>Doc / Contato:</strong> <span id="prev-cliente-doc"></span></div>
+          <div><strong>Forma de Pagamento:</strong> <span id="prev-pagamento">Pix</span></div>
+        </div>
+
+        <table class="doc-tabela">
+          <thead>
+            <tr>
+              <th>Descrição do Produto / Serviço</th>
+              <th style="text-align: center;">Qtd.</th>
+              <th style="text-align: right;">Unitário</th>
+              <th style="text-align: right;">Subtotal</th>
+              <th class="nao-imprimir" style="text-align: center;">Remover</th>
+            </tr>
+          </thead>
+          <tbody id="prev-tabela-itens">
+            <tr>
+              <td colspan="5" style="text-align: center; color: #94a3b8; padding: 16px;">Nenhum item adicionado ainda.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="doc-totais">
+          <div id="prev-linha-desconto" class="oculto">
+            <span>Desconto:</span>
+            <span id="prev-desconto">- R$ 0,00</span>
+          </div>
+          <div class="doc-total-final">
+            <span>VALOR TOTAL:</span>
+            <strong id="prev-total">R$ 0,00</strong>
+          </div>
+        </div>
+
+        <p id="prev-texto-declaracao" class="doc-declaracao"></p>
+        <p id="prev-obs" class="doc-obs"></p>
+
+        <div class="doc-assinatura">
+          <div class="linha-assinatura"></div>
+          <span id="prev-assinatura-nome">Assinatura do Responsável</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== DADOS SALVOS ====================
+    let estoque = {};
+    let historico = [];
+    let financeiro = [];
+    let empresa = { nome: 'Sua Empresa Ltda', doc: '', tel: '', end: '' };
+    let itensDocumento = [];
+
+    try {
+      estoque = JSON.parse(localStorage.getItem('estoque')) || {};
+      historico = JSON.parse(localStorage.getItem('historico')) || [];
+      financeiro = JSON.parse(localStorage.getItem('financeiro')) || [];
+      const empSalva = JSON.parse(localStorage.getItem('empresa'));
+      if (empSalva) empresa = empSalva;
+    } catch (e) {
+      console.error('Erro ao ler dados locais:', e);
+    }
+
+    // ==================== ELEMENTOS DA TELA ====================
+    const formEstoque = document.getElementById('form-movimentacao');
+    const tabelaEstoque = document.getElementById('tabela-estoque');
+    const listaHistorico = document.getElementById('lista-historico');
+
+    const formFinanceiro = document.getElementById('form-financeiro');
+    const tabelaFinanceiro = document.getElementById('tabela-financeiro');
+
+    function dataHojeISO() {
+      const hoje = new Date();
+      const ano = hoje.getFullYear();
+      const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+      const dia = String(hoje.getDate()).padStart(2, '0');
+      return `${ano}-${mes}-${dia}`;
+    }
+
+    document.getElementById('data-fin').value = dataHojeISO();
+
+    // Inicializa dados da empresa e telas
+    carregarDadosEmpresa();
+    atualizarTelaEstoque();
+    atualizarTelaFinanceiro();
+    atualizarPreviewDocumento();
+
+    // ==================== NAVEGAÇÃO ENTRE ABAS ====================
+    function trocarAba(aba) {
+      const secoes = ['estoque', 'financeiro', 'documentos'];
+      secoes.forEach(nome => {
+        const elSecao = document.getElementById('secao-' + nome);
+        const elBtn = document.getElementById('btn-aba-' + nome);
+        if (elSecao) elSecao.classList.add('oculto');
+        if (elBtn) elBtn.classList.remove('ativa');
+      });
+
+      const secaoAtiva = document.getElementById('secao-' + aba);
+      const btnAtivo = document.getElementById('btn-aba-' + aba);
+      if (secaoAtiva) secaoAtiva.classList.remove('oculto');
+      if (btnAtivo) btnAtivo.classList.add('ativa');
+
+      if (aba === 'financeiro') atualizarTelaFinanceiro();
+      if (aba === 'documentos') atualizarPreviewDocumento();
+    }
+
+    // ==================== LÓGICA DE ESTOQUE, CUSTO E MARGEM ====================
+    function preencherPrecosExistentes() {
+      const nome = document.getElementById('produto').value.trim().toLowerCase();
+      const item = estoque[nome];
+      if (item) {
+        if (item.custo > 0) document.getElementById('preco-custo').value = item.custo;
+        if (item.venda > 0) document.getElementById('preco-venda').value = item.venda;
+      }
+    }
+
+    function atualizarSugestoesProdutos() {
+      const datalist = document.getElementById('lista-produtos-sugestao');
+      if (!datalist) return;
+      datalist.innerHTML = '';
+      for (const chave in estoque) {
+        const opt = document.createElement('option');
+        opt.value = estoque[chave].nome;
+        datalist.appendChild(opt);
+      }
+    }
+
+    formEstoque.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const nomeInput = document.getElementById('produto').value.trim();
+      const tipo = document.getElementById('tipo').value;
+      const quantidade = parseInt(document.getElementById('quantidade').value);
+      const inputCusto = parseFloat(document.getElementById('preco-custo').value);
+      const inputVenda = parseFloat(document.getElementById('preco-venda').value);
+      const integrar = document.getElementById('integrar-financeiro').checked;
+      const statusIntegracao = document.getElementById('status-estoque-fin').value;
+      const chave = nomeInput.toLowerCase();
+
+      if (!estoque[chave]) {
+        estoque[chave] = { nome: nomeInput, quantidade: 0, custo: 0, venda: 0 };
+      }
+
+      if (!isNaN(inputCusto) && inputCusto >= 0) estoque[chave].custo = inputCusto;
+      if (!isNaN(inputVenda) && inputVenda >= 0) estoque[chave].venda = inputVenda;
+
+      const custoAtual = estoque[chave].custo || 0;
+      const vendaAtual = estoque[chave].venda || 0;
+
+      if (tipo === 'entrada') {
+        estoque[chave].quantidade += quantidade;
+      } else {
+        if (estoque[chave].quantidade < quantidade) {
+          alert(`Estoque insuficiente! Saldo atual de ${estoque[chave].nome}: ${estoque[chave].quantidade}`);
+          return;
+        }
+        estoque[chave].quantidade -= quantidade;
+      }
+
+      const isEntrada = tipo === 'entrada';
+      const valorOperacao = isEntrada ? (custoAtual * quantidade) : (vendaAtual * quantidade);
+      const lucroOperacao = !isEntrada && custoAtual > 0 && vendaAtual > 0
+        ? (vendaAtual - custoAtual) * quantidade
+        : 0;
+
+      const agora = new Date().toLocaleString('pt-BR');
+      historico.unshift({
+        produto: estoque[chave].nome,
+        tipo: tipo,
+        quantidade: quantidade,
+        valorTotal: valorOperacao,
+        lucroOperacao: lucroOperacao,
+        data: agora
+      });
+
+      if (integrar && valorOperacao > 0) {
+        financeiro.unshift({
+          id: Date.now(),
+          dataISO: dataHojeISO(),
+          descricao: `${isEntrada ? 'Compra estoque' : 'Venda produto'}: ${estoque[chave].nome} (${quantidade}x)`,
+          categoria: isEntrada ? 'Fornecedores' : 'Vendas',
+          tipo: isEntrada ? 'despesa' : 'receita',
+          status: statusIntegracao,
+          valor: valorOperacao
+        });
+      }
+
+      salvarDados();
+      atualizarTelaEstoque();
+      atualizarTelaFinanceiro();
+      formEstoque.reset();
+      document.getElementById('quantidade').value = 1;
+      document.getElementById('integrar-financeiro').checked = true;
+    });
+
+    function removerProduto(chave) {
+      if (confirm(`Remover "${estoque[chave].nome}" da lista de estoque?`)) {
+        delete estoque[chave];
+        salvarDados();
+        atualizarTelaEstoque();
+      }
+    }
+
+    function atualizarTelaEstoque() {
+      atualizarSugestoesProdutos();
+
+      const termoBusca = document.getElementById('busca-estoque').value.toLowerCase().trim();
+      tabelaEstoque.innerHTML = '';
+
+      let custoTotalEstoque = 0;
+      let vendaTotalEstoque = 0;
+
+      for (const chave in estoque) {
+        const item = estoque[chave];
+        const custo = item.custo || 0;
+        const venda = item.venda || 0;
+
+        custoTotalEstoque += custo * item.quantidade;
+        vendaTotalEstoque += venda * item.quantidade;
+
+        if (termoBusca && !item.nome.toLowerCase().includes(termoBusca)) continue;
+
+        let margemHTML = '<span style="color:#94a3b8;">—</span>';
+        if (venda > 0 && custo > 0) {
+          const lucroUnit = venda - custo;
+          const margemPerc = ((lucroUnit / venda) * 100).toFixed(1);
+          const classeMargem = lucroUnit >= 0 ? 'margem-positiva' : 'margem-negativa';
+          margemHTML = `
+            <div class="${classeMargem}">${margemPerc}%</div>
+            <div class="detalhe-preco">${formatarMoeda(lucroUnit)}/un</div>
+          `;
+        }
+
+        const estoqueBaixo = item.quantidade <= 5;
+        const statusHTML = estoqueBaixo
+          ? `<span class="badge-baixo">Baixo (≤ 5)</span>`
+          : `<span class="badge-ok">Normal</span>`;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${item.nome}</strong></td>
+          <td><strong>${item.quantidade}</strong></td>
+          <td>
+            <div class="detalhe-preco">Custo: ${formatarMoeda(custo)}</div>
+            <div class="detalhe-preco">Venda: <strong>${formatarMoeda(venda)}</strong></div>
+          </td>
+          <td>${margemHTML}</td>
+          <td>${statusHTML}</td>
+          <td><button type="button" class="btn-excluir" onclick="removerProduto('${chave}')">Remover</button></td>
+        `;
+        tabelaEstoque.appendChild(tr);
+      }
+
+      const lucroProjetado = vendaTotalEstoque - custoTotalEstoque;
+      document.getElementById('estoque-custo-total').textContent = formatarMoeda(custoTotalEstoque);
+      document.getElementById('estoque-venda-total').textContent = formatarMoeda(vendaTotalEstoque);
+
+      const elLucro = document.getElementById('estoque-lucro-total');
+      elLucro.textContent = formatarMoeda(lucroProjetado);
+      elLucro.style.color = lucroProjetado >= 0 ? '#16a34a' : '#dc2626';
+
+      listaHistorico.innerHTML = '';
+      historico.forEach(mov => {
+        const li = document.createElement('li');
+        const sinal = mov.tipo === 'entrada' ? '+' : '-';
+        const classe = mov.tipo === 'entrada' ? 'entrada' : 'saida';
+        const infoValor = mov.valorTotal > 0 ? ` — ${formatarMoeda(mov.valorTotal)}` : '';
+        const infoLucro = mov.lucroOperacao > 0 ? ` <span class="margem-positiva">(Lucro: +${formatarMoeda(mov.lucroOperacao)})</span>` : '';
+
+        li.innerHTML = `
+          <span class="${classe}">[${mov.tipo.toUpperCase()} ${sinal}${mov.quantidade}]</span> 
+          ${mov.produto}${infoValor}${infoLucro} — <small>${mov.data}</small>
+        `;
+        listaHistorico.appendChild(li);
+      });
+    }
+
+    // ==================== LÓGICA FINANCEIRA E VENCIMENTOS ====================
+    formFinanceiro.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const descricao = document.getElementById('descricao-fin').value.trim();
+      const categoria = document.getElementById('categoria-fin').value;
+      const tipo = document.getElementById('tipo-fin').value;
+      const valor = parseFloat(document.getElementById('valor-fin').value);
+      const dataISO = document.getElementById('data-fin').value || dataHojeISO();
+      const status = document.getElementById('status-fin').value;
+
+      financeiro.unshift({
+        id: Date.now(),
+        dataISO: dataISO,
+        descricao: descricao,
+        categoria: categoria,
+        tipo: tipo,
+        status: status,
+        valor: valor
+      });
+
+      salvarDados();
+      atualizarTelaFinanceiro();
+      formFinanceiro.reset();
+      document.getElementById('data-fin').value = dataHojeISO();
+    });
+
+    function darBaixaLancamento(id) {
+      const item = financeiro.find(lanc => lanc.id === id);
+      if (item) {
+        item.status = 'pago';
+        salvarDados();
+        atualizarTelaFinanceiro();
+      }
+    }
+
+    function removerLancamento(id) {
+      if (confirm('Excluir este lançamento financeiro?')) {
+        financeiro = financeiro.filter(item => item.id !== id);
+        salvarDados();
+        atualizarTelaFinanceiro();
+      }
+    }
+
+    function limparFiltrosFinanceiro() {
+      document.getElementById('filtro-mes').value = '';
+      document.getElementById('filtro-status').value = 'todos';
+      atualizarTelaFinanceiro();
+    }
+
+    function formatarMoeda(valor) {
+      return Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function formatarDataBR(item) {
+      if (item.dataISO) {
+        const [ano, mes, dia] = item.dataISO.split('-');
+        return `${dia}/${mes}/${ano}`;
+      }
+      return item.data || '';
+    }
+
+    function analisarVencimento(item) {
+      const statusAtual = item.status || 'pago';
+      if (statusAtual === 'pago') {
+        return { codigo: 'pago', html: `<span class="badge-ok">Pago</span>` };
+      }
+
+      const hojeStr = dataHojeISO();
+      const vencStr = item.dataISO || hojeStr;
+
+      const hojeDate = new Date(hojeStr + 'T00:00:00');
+      const vencDate = new Date(vencStr + 'T00:00:00');
+      const diffDias = Math.round((vencDate - hojeDate) / (1000 * 60 * 60 * 24));
+
+      if (diffDias < 0) {
+        const diasAtraso = Math.abs(diffDias);
+        return { codigo: 'atrasado', html: `<span class="badge-atrasado">Atrasado (${diasAtraso}d)</span>` };
+      }
+      if (diffDias === 0) {
+        return { codigo: 'vence_hoje', html: `<span class="badge-alerta">Vence Hoje!</span>` };
+      }
+      if (diffDias <= 3) {
+        return { codigo: 'vence_breve', html: `<span class="badge-alerta">Vence em ${diffDias}d</span>` };
+      }
+      return { codigo: 'pendente', html: `<span class="badge-pendente">Pendente</span>` };
+    }
+
+    function atualizarBannerAlertas() {
+      const banner = document.getElementById('banner-alertas');
+      let qtdAtrasadas = 0;
+      let valorAtrasado = 0;
+      let qtdVencendo = 0;
+
+      financeiro.forEach(item => {
+        const analise = analisarVencimento(item);
+        if (analise.codigo === 'atrasado') {
+          qtdAtrasadas++;
+          valorAtrasado += item.valor;
+        } else if (analise.codigo === 'vence_hoje' || analise.codigo === 'vence_breve') {
+          qtdVencendo++;
+        }
+      });
+
+      if (qtdAtrasadas === 0 && qtdVencendo === 0) {
+        banner.classList.add('oculto');
+        return;
+      }
+
+      const mensagens = [];
+      if (qtdAtrasadas > 0) {
+        mensagens.push(`<strong>Atenção:</strong> Você tem <strong>${qtdAtrasadas}</strong> conta(s) atrasada(s) somando <strong>${formatarMoeda(valorAtrasado)}</strong>.`);
+      }
+      if (qtdVencendo > 0) {
+        mensagens.push(`Existem <strong>${qtdVencendo}</strong> conta(s) pendente(s) vencendo hoje ou nos próximos 3 dias.`);
+      }
+
+      banner.innerHTML = mensagens.join(' ');
+      banner.classList.remove('oculto');
+    }
+
+    function atualizarTelaFinanceiro() {
+      atualizarBannerAlertas();
+
+      const mesFiltro = document.getElementById('filtro-mes').value;
+      const statusFiltro = document.getElementById('filtro-status').value;
+
+      let totalReceitasPagas = 0;
+      let totalDespesasPagas = 0;
+      let totalAReceber = 0;
+      let totalAPagar = 0;
+      const despesasPorCategoria = {};
+
+      tabelaFinanceiro.innerHTML = '';
+
+      financeiro.forEach(item => {
+        if (mesFiltro && item.dataISO && !item.dataISO.startsWith(mesFiltro)) return;
+
+        const statusItem = item.status || 'pago';
+        const analise = analisarVencimento(item);
+
+        if (statusItem === 'pago') {
+          if (item.tipo === 'receita') {
+            totalReceitasPagas += item.valor;
+          } else {
+            totalDespesasPagas += item.valor;
+            const cat = item.categoria || 'Outros';
+            despesasPorCategoria[cat] = (despesasPorCategoria[cat] || 0) + item.valor;
+          }
+        } else {
+          if (item.tipo === 'receita') {
+            totalAReceber += item.valor;
+          } else {
+            totalAPagar += item.valor;
+          }
+        }
+
+        if (statusFiltro === 'pago' && statusItem !== 'pago') return;
+        if (statusFiltro === 'pendente' && statusItem !== 'pendente') return;
+        if (statusFiltro === 'atrasado' && analise.codigo !== 'atrasado') return;
+
+        const classeValor = item.tipo === 'receita' ? 'entrada' : 'saida';
+        const sinal = item.tipo === 'receita' ? '+' : '-';
+        const classeLinha = analise.codigo === 'atrasado' ? 'linha-atrasada' : '';
+
+        const botaoBaixa = statusItem === 'pendente'
+          ? `<button type="button" class="btn-baixar" title="Marcar como Pago" onclick="darBaixaLancamento(${item.id})">Dar Baixa</button>`
+          : '';
+
+        const tr = document.createElement('tr');
+        tr.className = classeLinha;
+        tr.innerHTML = `
+          <td>${formatarDataBR(item)}</td>
+          <td>
+            <div>${item.descricao}</div>
+            <span class="badge-cat">${item.categoria || 'Geral'}</span>
+          </td>
+          <td>${analise.html}</td>
+          <td class="${classeValor}">${sinal} ${formatarMoeda(item.valor)}</td>
+          <td>
+            <div class="grupo-acoes-tabela">
+              ${botaoBaixa}
+              <button type="button" class="btn-excluir" onclick="removerLancamento(${item.id})">Excluir</button>
+            </div>
+          </td>
+        `;
+        tabelaFinanceiro.appendChild(tr);
+      });
+
+      const saldoReal = totalReceitasPagas - totalDespesasPagas;
+      document.getElementById('total-receitas').textContent = formatarMoeda(totalReceitasPagas);
+      document.getElementById('total-despesas').textContent = formatarMoeda(totalDespesasPagas);
+      document.getElementById('total-a-receber').textContent = formatarMoeda(totalAReceber);
+      document.getElementById('total-a-pagar').textContent = formatarMoeda(totalAPagar);
+
+      const elSaldo = document.getElementById('saldo-financeiro');
+      elSaldo.textContent = formatarMoeda(saldoReal);
+      elSaldo.style.color = saldoReal >= 0 ? '#16a34a' : '#dc2626';
+
+      desenharGraficoBarras(totalReceitasPagas, totalDespesasPagas);
+      desenharGraficoRosca(despesasPorCategoria, totalDespesasPagas);
+    }
+
+    // ==================== GRÁFICOS VISUAIS (CANVAS NATIVO) ====================
+    function desenharGraficoBarras(receitas, despesas) {
+      const canvas = document.getElementById('grafico-barras');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const maxValor = Math.max(receitas, despesas, 1);
+      const alturaMaxima = 125;
+      const baseY = 165;
+
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(30, baseY);
+      ctx.lineTo(270, baseY);
+      ctx.stroke();
+
+      const altRec = (receitas / maxValor) * alturaMaxima;
+      ctx.fillStyle = '#16a34a';
+      ctx.fillRect(65, baseY - altRec, 60, altRec);
+
+      const altDesp = (despesas / maxValor) * alturaMaxima;
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(175, baseY - altDesp, 60, altDesp);
+
+      ctx.fillStyle = '#334155';
+      ctx.font = 'bold 12px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Receitas', 95, baseY + 18);
+      ctx.fillText('Despesas', 205, baseY + 18);
+
+      ctx.font = 'bold 11px Arial';
+      ctx.fillStyle = '#15803d';
+      ctx.fillText(formatarMoeda(receitas), 95, baseY - altRec - 6);
+
+      ctx.fillStyle = '#b91c1c';
+      ctx.fillText(formatarMoeda(despesas), 205, baseY - altDesp - 6);
+    }
+
+    function desenharGraficoRosca(categoriasObj, totalDespesas) {
+      const canvas = document.getElementById('grafico-rosca');
+      const legendaDiv = document.getElementById('legenda-rosca');
+      if (!canvas || !legendaDiv) return;
+
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      legendaDiv.innerHTML = '';
+
+      const centroX = canvas.width / 2;
+      const centroY = canvas.height / 2;
+      const raio = 65;
+
+      if (totalDespesas <= 0) {
+        ctx.beginPath();
+        ctx.arc(centroX, centroY, raio, 0, Math.PI * 2);
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 22;
+        ctx.stroke();
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Sem despesas', centroX, centroY + 4);
+        return;
+      }
+
+      const cores = ['#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6', '#10b981', '#ec4899'];
+      const entradas = Object.entries(categoriasObj).sort((a, b) => b[1] - a[1]);
+
+      let anguloAtual = -Math.PI / 2;
+
+      entradas.forEach(([categoria, valor], index) => {
+        const fatia = (valor / totalDespesas) * Math.PI * 2;
+        const cor = cores[index % cores.length];
+
+        ctx.beginPath();
+        ctx.arc(centroX, centroY, raio, anguloAtual, anguloAtual + fatia);
+        ctx.strokeStyle = cor;
+        ctx.lineWidth = 24;
+        ctx.stroke();
+
+        anguloAtual += fatia;
+
+        const percentual = ((valor / totalDespesas) * 100).toFixed(0);
+        const itemLegenda = document.createElement('div');
+        itemLegenda.className = 'item-legenda';
+        itemLegenda.innerHTML = `
+          <span class="cor-legenda" style="background-color: ${cor};"></span>
+          <span><strong>${categoria}:</strong> ${percentual}% (${formatarMoeda(valor)})</span>
+        `;
+        legendaDiv.appendChild(itemLegenda);
+      });
+    }
+
+    // ==================== RECIBO E ORÇAMENTO (IMPRESSÃO / PDF) ====================
+    function carregarDadosEmpresa() {
+      document.getElementById('emp-nome').value = empresa.nome || '';
+      document.getElementById('emp-doc').value = empresa.doc || '';
+      document.getElementById('emp-tel').value = empresa.tel || '';
+      document.getElementById('emp-end').value = empresa.end || '';
+      if (empresa.nome) {
+        document.getElementById('titulo-sistema').textContent = empresa.nome;
+      }
+    }
+
+    function salvarDadosEmpresa() {
+      empresa = {
+        nome: document.getElementById('emp-nome').value.trim() || 'Sua Empresa Ltda',
+        doc: document.getElementById('emp-doc').value.trim(),
+        tel: document.getElementById('emp-tel').value.trim(),
+        end: document.getElementById('emp-end').value.trim()
+      };
+      localStorage.setItem('empresa', JSON.stringify(empresa));
+      document.getElementById('titulo-sistema').textContent = empresa.nome;
+      atualizarPreviewDocumento();
+      alert('Dados da empresa salvos com sucesso!');
+    }
+
+    function preencherPrecoItemDoc() {
+      const desc = document.getElementById('doc-item-desc').value.trim().toLowerCase();
+      if (estoque[desc] && estoque[desc].venda > 0) {
+        document.getElementById('doc-item-valor').value = estoque[desc].venda;
+      }
+    }
+
+    function adicionarItemDocumento() {
+      const desc = document.getElementById('doc-item-desc').value.trim();
+      const qtd = parseInt(document.getElementById('doc-item-qtd').value) || 1;
+      const valor = parseFloat(document.getElementById('doc-item-valor').value) || 0;
+
+      if (!desc || valor <= 0) {
+        alert('Informe a descrição e o valor unitário do item.');
+        return;
+      }
+
+      itensDocumento.push({
+        id: Date.now(),
+        descricao: desc,
+        quantidade: qtd,
+        valorUnitario: valor
+      });
+
+      document.getElementById('doc-item-desc').value = '';
+      document.getElementById('doc-item-qtd').value = 1;
+      document.getElementById('doc-item-valor').value = '';
+      atualizarPreviewDocumento();
+    }
+
+    function removerItemDocumento(id) {
+      itensDocumento = itensDocumento.filter(item => item.id !== id);
+      atualizarPreviewDocumento();
+    }
+
+    function limparDocumento() {
+      itensDocumento = [];
+      document.getElementById('doc-cliente').value = '';
+      document.getElementById('doc-cliente-doc').value = '';
+      document.getElementById('doc-desconto').value = 0;
+      document.getElementById('doc-obs').value = '';
+      const numAtual = parseInt(document.getElementById('doc-numero').value) || 1;
+      document.getElementById('doc-numero').value = String(numAtual + 1).padStart(4, '0');
+      atualizarPreviewDocumento();
+    }
+
+    function atualizarPreviewDocumento() {
+      const nomeEmp = document.getElementById('emp-nome').value.trim() || 'Sua Empresa Ltda';
+      const docEmp = document.getElementById('emp-doc').value.trim();
+      const telEmp = document.getElementById('emp-tel').value.trim();
+      const endEmp = document.getElementById('emp-end').value.trim();
+
+      document.getElementById('prev-emp-nome').textContent = nomeEmp;
+      document.getElementById('prev-assinatura-nome').textContent = nomeEmp;
+
+      const detalhes = [];
+      if (docEmp) detalhes.push(`CNPJ/CPF: ${docEmp}`);
+      if (telEmp) detalhes.push(`Tel: ${telEmp}`);
+      if (endEmp) detalhes.push(endEmp);
+      document.getElementById('prev-emp-detalhes').textContent = detalhes.length > 0
+        ? detalhes.join(' | ')
+        : 'Configure os dados da sua empresa acima';
+
+      const tipoDoc = document.getElementById('doc-tipo').value;
+      const numDoc = document.getElementById('doc-numero').value.trim() || '0001';
+      const pagamento = document.getElementById('doc-pagamento').value;
+      const cliente = document.getElementById('doc-cliente').value.trim() || 'Consumidor Final';
+      const clienteDoc = document.getElementById('doc-cliente-doc').value.trim();
+      const desconto = parseFloat(document.getElementById('doc-desconto').value) || 0;
+      const obs = document.getElementById('doc-obs').value.trim();
+
+      document.getElementById('prev-doc-tipo').textContent = tipoDoc;
+      document.getElementById('prev-doc-num').textContent = `Nº ${numDoc}`;
+      document.getElementById('prev-doc-data').textContent = new Date().toLocaleDateString('pt-BR');
+      document.getElementById('prev-cliente').textContent = cliente;
+      document.getElementById('prev-pagamento').textContent = pagamento;
+
+      const linhaDocCliente = document.getElementById('prev-cliente-doc-linha');
+      if (clienteDoc) {
+        document.getElementById('prev-cliente-doc').textContent = clienteDoc;
+        linhaDocCliente.classList.remove('oculto');
+      } else {
+        linhaDocCliente.classList.add('oculto');
+      }
+
+      const tbody = document.getElementById('prev-tabela-itens');
+      tbody.innerHTML = '';
+
+      let subtotalGeral = 0;
+
+      if (itensDocumento.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 16px;">Nenhum item adicionado ainda.</td></tr>`;
+      } else {
+        itensDocumento.forEach(item => {
+          const subtotalItem = item.quantidade * item.valorUnitario;
+          subtotalGeral += subtotalItem;
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${item.descricao}</td>
+            <td style="text-align: center;">${item.quantidade}</td>
+            <td style="text-align: right;">${formatarMoeda(item.valorUnitario)}</td>
+            <td style="text-align: right;"><strong>${formatarMoeda(subtotalItem)}</strong></td>
+            <td class="nao-imprimir" style="text-align: center;">
+              <button type="button" class="btn-excluir" onclick="removerItemDocumento(${item.id})">X</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      const totalFinal = Math.max(subtotalGeral - desconto, 0);
+
+      const linhaDesc = document.getElementById('prev-linha-desconto');
+      if (desconto > 0) {
+        document.getElementById('prev-desconto').textContent = `- ${formatarMoeda(desconto)}`;
+        linhaDesc.classList.remove('oculto');
+      } else {
+        linhaDesc.classList.add('oculto');
+      }
+
+      document.getElementById('prev-total').textContent = formatarMoeda(totalFinal);
+
+      const elDeclaracao = document.getElementById('prev-texto-declaracao');
+      if (tipoDoc === 'RECIBO DE PAGAMENTO') {
+        elDeclaracao.textContent = `Recebemos de ${cliente} a importância total de ${formatarMoeda(totalFinal)}, referente aos produtos/serviços discriminados acima, dando plena quitação.`;
+      } else {
+        elDeclaracao.textContent = `Apresentamos a proposta comercial acima no valor total de ${formatarMoeda(totalFinal)}, sujeita às condições de pagamento informadas.`;
+      }
+
+      document.getElementById('prev-obs').textContent = obs ? `Observações: ${obs}` : '';
+    }
+
+    function imprimirDocumentoPDF() {
+      if (itensDocumento.length === 0) {
+        alert('Adicione pelo menos um produto ou serviço antes de imprimir/gerar PDF.');
+        return;
+      }
+      window.focus();
+      window.print();
+    }
+
+    // ==================== EXPORTAÇÃO EXCEL (CSV) E BACKUP ====================
+    function baixarArquivo(conteudo, nomeArquivo, tipoMime) {
+      const blob = new Blob([conteudo], { type: tipoMime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nomeArquivo;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportarEstoqueCSV() {
+      let csv = '\uFEFFProduto;Quantidade;Preco_Custo;Preco_Venda;Margem_Percentual;Status\n';
+      for (const chave in estoque) {
+        const item = estoque[chave];
+        const custo = item.custo || 0;
+        const venda = item.venda || 0;
+        const margem = venda > 0 && custo > 0 ? (((venda - custo) / venda) * 100).toFixed(1).replace('.', ',') + '%' : '0%';
+        const status = item.quantidade <= 5 ? 'Estoque Baixo' : 'Normal';
+
+        csv += `${item.nome};${item.quantidade};${custo.toFixed(2).replace('.', ',')};${venda.toFixed(2).replace('.', ',')};${margem};${status}\n`;
+      }
+      baixarArquivo(csv, `estoque-${dataHojeISO()}.csv`, 'text/csv;charset=utf-8;');
+    }
+
+    function exportarFinanceiroCSV() {
+      let csv = '\uFEFFVencimento;Descricao;Categoria;Tipo;Situacao;Valor\n';
+      financeiro.forEach(item => {
+        const valorFormatado = item.valor.toFixed(2).replace('.', ',');
+        const situacao = (item.status || 'pago') === 'pago' ? 'Pago' : 'Pendente';
+        csv += `${formatarDataBR(item)};${item.descricao};${item.categoria || 'Geral'};${item.tipo};${situacao};${valorFormatado}\n`;
+      });
+      baixarArquivo(csv, `financeiro-${dataHojeISO()}.csv`, 'text/csv;charset=utf-8;');
+    }
+
+    function exportarBackup() {
+      const dados = JSON.stringify({ estoque, historico, financeiro, empresa }, null, 2);
+      baixarArquivo(dados, `backup-sistema-${dataHojeISO()}.json`, 'application/json');
+    }
+
+    function restaurarBackup(event) {
+      const arquivo = event.target.files[0];
+      if (!arquivo) return;
+
+      const leitor = new FileReader();
+      leitor.onload = function(e) {
+        try {
+          const dados = JSON.parse(e.target.result);
+          if (dados.estoque && dados.financeiro) {
+            estoque = dados.estoque;
+            historico = dados.historico || [];
+            financeiro = dados.financeiro;
+            if (dados.empresa) {
+              empresa = dados.empresa;
+              localStorage.setItem('empresa', JSON.stringify(empresa));
+              carregarDadosEmpresa();
+            }
+            salvarDados();
+            atualizarTelaEstoque();
+            atualizarTelaFinanceiro();
+            atualizarPreviewDocumento();
+            alert('Backup restaurado com sucesso!');
+          } else {
+            alert('Arquivo de backup inválido.');
+          }
+        } catch {
+          alert('Erro ao ler o arquivo de backup.');
+        }
+      };
+      leitor.readAsText(arquivo);
+    }
+
+    // ==================== SALVAMENTO ====================
+    function salvarDados() {
+      localStorage.setItem('estoque', JSON.stringify(estoque));
+      localStorage.setItem('historico', JSON.stringify(historico));
+      localStorage.setItem('financeiro', JSON.stringify(financeiro));
+    }
+  </script>
+</body>
+</html>
